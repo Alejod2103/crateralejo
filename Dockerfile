@@ -3,51 +3,43 @@ FROM php:8.1-fpm
 ARG user=crater
 ARG uid=1000
 
-# Instalar dependencias del sistema
+# Dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    libzip-dev \
-    libmagickwand-dev \
-    mariadb-client && \
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip \
+    libzip-dev libmagickwand-dev mariadb-client && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instalar y habilitar imagick
+# Extensiones PHP
 RUN pecl install imagick && docker-php-ext-enable imagick
-
-# Instalar extensiones de PHP
 RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Copiar Composer desde imagen oficial
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Crear usuario del sistema
+# Crear usuario
 RUN useradd -G www-data,root -u $uid -d /home/$user $user && \
     mkdir -p /home/$user/.composer && \
     chown -R $user:$user /home/$user
 
-# Establecer el directorio de trabajo
+# Código de la app
 WORKDIR /var/www
-
-# Copiar código del proyecto
 COPY . .
 
-# Instalar dependencias PHP con Composer
+# Instalar dependencias
 RUN composer install
 
-# Asignar permisos correctos
+# Permisos
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Usar el nuevo usuario
+# ⚠️ TEMPORAL: generar APP_KEY para copiar del log
+RUN php artisan key:generate --show
+
+# ⚠️ TEMPORAL: ejecutar migraciones y seeders si quieres
+# RUN php artisan migrate --force && php artisan db:seed
+
+# Usar usuario no root
 USER $user
 
-# Exponer el puerto 8080 (Render lo espera por defecto)
+# Servir Laravel en puerto 8080 (Render)
 EXPOSE 8080
-
-# Iniciar el servidor embebido de Laravel
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
