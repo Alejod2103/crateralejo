@@ -32,7 +32,7 @@ WORKDIR /var/www
 COPY . .
 
 # Instalar dependencias PHP
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install
 
 # Permisos para Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
