@@ -169,7 +169,12 @@ return [
         Crater\Providers\RouteServiceProvider::class,
         Crater\Providers\DropboxServiceProvider::class,
         Crater\Providers\ViewServiceProvider::class,
-        Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
+
+        // Solo cargar en entorno local
+        // Esto previene errores cuando no está instalado en producción
+        env('APP_ENV') === 'local'
+            ? Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class
+            : null,
     ],
 
     /*
