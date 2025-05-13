@@ -28,14 +28,11 @@ COPY . .
 # Instalar dependencias
 RUN composer install
 
+# Ejecutar migraciones y seeders automáticamente
+RUN php artisan migrate --force && php artisan db:seed
+
 # Permisos
 RUN chown -R www-data:www-data storage bootstrap/cache
-
-# ⚠️ TEMPORAL: generar APP_KEY para copiar del log
-RUN php artisan key:generate --show
-
-# ⚠️ TEMPORAL: ejecutar migraciones y seeders si quieres
-# RUN php artisan migrate --force && php artisan db:seed
 
 # Usar usuario no root
 USER $user
