@@ -28,15 +28,12 @@ COPY . .
 # Instalar dependencias
 RUN composer install
 
-# Ejecutar migraciones y seeders automáticamente
-RUN php artisan migrate --force && php artisan db:seed
-
 # Permisos
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 # Usar usuario no root
 USER $user
 
-# Servir Laravel en puerto 8080 (Render)
+# Servir Laravel en puerto 8080 y ejecutar migraciones/semilla al inicio
 EXPOSE 8080
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+CMD php artisan migrate --force && php artisan db:seed && php artisan serve --host=0.0.0.0 --port=8080
