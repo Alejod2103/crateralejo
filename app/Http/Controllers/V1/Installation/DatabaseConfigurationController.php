@@ -4,46 +4,32 @@ namespace Crater\Http\Controllers\V1\Installation;
 
 use Crater\Http\Controllers\Controller;
 use Crater\Http\Requests\DatabaseEnvironmentRequest;
-use Crater\Space\EnvironmentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
 class DatabaseConfigurationController extends Controller
 {
     /**
-     * @var EnvironmentManager
-     */
-    protected $EnvironmentManager;
-
-    /**
-     * @param EnvironmentManager $environmentManager
-     */
-    public function __construct(EnvironmentManager $environmentManager)
-    {
-        $this->environmentManager = $environmentManager;
-    }
-
-    /**
-     *
-     * @param DatabaseEnvironmentRequest $request
+     * Simula guardar las variables del entorno sin escribir el archivo .env
+     * para entornos como Railway que no permiten modificar archivos.
      */
     public function saveDatabaseEnvironment(DatabaseEnvironmentRequest $request)
     {
+        // Simular configuración con éxito
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
 
-        $results = $this->environmentManager->saveDatabaseVariables($request);
+        // Ejecuta las migraciones y seeders directamente
+        Artisan::call('key:generate --force');
+        Artisan::call('optimize:clear');
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('storage:link');
+        Artisan::call('migrate --seed --force');
 
-        if (array_key_exists("success", $results)) {
-            Artisan::call('key:generate --force');
-            Artisan::call('optimize:clear');
-            Artisan::call('config:clear');
-            Artisan::call('cache:clear');
-            Artisan::call('storage:link');
-            Artisan::call('migrate --seed --force');
-        }
-
-        return response()->json($results);
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     public function getDatabaseEnvironment(Request $request)
@@ -56,7 +42,6 @@ class DatabaseConfigurationController extends Controller
                     'database_connection' => 'sqlite',
                     'database_name' => database_path('database.sqlite'),
                 ];
-
                 break;
 
             case 'pgsql':
@@ -65,7 +50,6 @@ class DatabaseConfigurationController extends Controller
                     'database_host' => '127.0.0.1',
                     'database_port' => 5432,
                 ];
-
                 break;
 
             case 'mysql':
@@ -74,11 +58,8 @@ class DatabaseConfigurationController extends Controller
                     'database_host' => '127.0.0.1',
                     'database_port' => 3306,
                 ];
-
                 break;
-
         }
-
 
         return response()->json([
             'config' => $databaseData,
