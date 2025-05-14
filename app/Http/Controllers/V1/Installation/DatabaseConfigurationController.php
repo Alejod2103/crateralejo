@@ -25,7 +25,6 @@ class DatabaseConfigurationController extends Controller
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
         Artisan::call('storage:link');
-        Artisan::call('migrate --seed --force');
 
         return response()->json([
             'success' => true,
