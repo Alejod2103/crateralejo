@@ -14,7 +14,13 @@ class CountriesTableSeeder extends Seeder
     */
     public function run()
     {
-        DB::table('countries')->truncate();
+        // Primero eliminamos las direcciones que dependan de paises
+        DB::table('addresses')->delete();
+
+        // Luego eliminamos los paises
+        DB::table('countries')->delete();
+
+        
         $countries = [
         ['id' => 1,'code' => 'AF' ,'name' => "Afghanistan",'phonecode' => 93],
         ['id' => 2,'code' => 'AL' ,'name' => "Albania",'phonecode' => 355],
@@ -263,6 +269,8 @@ class CountriesTableSeeder extends Seeder
         ['id' => 245,'code' => 'ZM','name' => "Zambia",'phonecode' => 260],
         ['id' => 246,'code' => 'ZW','name' => "Zimbabwe",'phonecode' => 263],
         ];
+
+        
         DB::table('countries')->insert($countries);
     }
 }
