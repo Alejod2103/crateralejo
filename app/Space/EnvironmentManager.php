@@ -32,11 +32,26 @@ class EnvironmentManager
  * @param DatabaseEnvironmentRequest $request
  * @return array
  */
-    public function saveDatabaseVariables($request)
-    {
-        // 🚨 Skip .env writing in Railway (avoid file permission errors)
+
+ public function saveDatabaseVariables($request)
+{
+    // Validar conexión a la DB sin tocar el archivo .env
+    try {
+        $conn = $this->checkDatabaseConnection($request);
+
+        if (\Schema::hasTable('users')) {
+            return [
+                'error' => 'database_should_be_empty',
+            ];
+        }
+
         return ['success' => true];
+    } catch (\Exception $e) {
+        return [
+            'error_message' => $e->getMessage(),
+        ];
     }
+}
 
 
     /**
