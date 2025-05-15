@@ -35,7 +35,7 @@ class EnvironmentManager
 
  public function saveDatabaseVariables($request)
 {
-    // Validar conexión a la DB sin tocar el archivo .env
+    // Solo validar conexión a la base de datos y asegurarse de que esté vacía
     try {
         $conn = $this->checkDatabaseConnection($request);
 
@@ -45,7 +45,10 @@ class EnvironmentManager
             ];
         }
 
-        return ['success' => true];
+        // Nada más, no leer ni escribir .env
+        return [
+            'success' => true,
+        ];
     } catch (\Exception $e) {
         return [
             'error_message' => $e->getMessage(),
